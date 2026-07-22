@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Env / secrets
+.env
+*.db
+*.sqlite3
+
+# Logs (каталог отслеживаем через .gitkeep, содержимое — нет)
+logs/*.log
+logs/*.jsonl
+logs/emails/*.eml
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.venv/
+logs/pip_install.log
+logs/poetry_install.log
+logs/poetry_lock.log

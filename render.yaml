@@ -1,0 +1,46 @@
+# Render Blueprint (Infrastructure as Code).
+# Создаёт web-сервис из Docker + managed PostgreSQL.
+# Подключение: Render Dashboard → New → Blueprint → указать этот репозиторий.
+# Docs: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: contacts-db
+    plan: free
+    databaseName: contacts
+    user: app
+
+services:
+  - type: web
+    name: ai-contact-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      # asyncpg-URL собирается из managed-базы. Render отдаёт postgres://,
+      # приложению нужен postgresql+asyncpg:// — задаётся вручную в дашборде
+      # или через fromDatabase + префикс (см. docs/ci-cd.md).
+      - key: DATABASE_URL
+        fromDatabase:
+          name: contacts-db
+          property: connectionString
+      - key: AI_PROVIDER
+        value: mock              # переключить на anthropic + добавить ключ при необходимости
+      - key: EMAIL_BACKEND
+        value: console           # переключить на smtp + добавить SMTP_* при необходимости
+      - key: EMAIL_OWNER
+        sync: false              # задать в дашборде
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: RATE_LIMIT_CONTACT
+        value: "5/minute"
+      # Секреты (sync: false → вводятся в дашборде, не хранятся в репозитории):
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_BASE_URL
+        sync: false

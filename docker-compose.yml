@@ -1,0 +1,55 @@
+# Локальный стек: приложение + PostgreSQL + Redis.
+# Запуск:  docker compose up --build
+# API:     http://localhost:8000/docs
+
+services:
+  app:
+    build: .
+    container_name: contact_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+asyncpg://app:app@postgres:5432/contacts
+      REDIS_URL: redis://redis:6379/0
+      # AI и email по умолчанию в mock/console — работает без секретов.
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-console}
+      EMAIL_OWNER: ${EMAIL_OWNER:-owner@example.com}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      # Проброс ключей, если пользователь их задал (иначе пусто → mock).
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: contact_postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: contacts
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d contacts"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: contact_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

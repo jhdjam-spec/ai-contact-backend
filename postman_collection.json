@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "AI Contact Backend",
+    "description": "Коллекция запросов к сервису формы обратной связи. Переменная {{base_url}} по умолчанию http://localhost:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" }
+  ],
+  "item": [
+    {
+      "name": "POST /api/contact — валидное обращение (проект)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/api/contact", "host": ["{{base_url}}"], "path": ["api", "contact"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Иван Петров\",\n  \"email\": \"ivan@example.com\",\n  \"phone\": \"+7 900 123-45-67\",\n  \"comment\": \"Здравствуйте! Хотим предложить проект по разработке backend.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "POST /api/contact — предложение о работе (job_offer)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/api/contact", "host": ["{{base_url}}"], "path": ["api", "contact"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"HR Мария\",\n  \"email\": \"hr@company.com\",\n  \"phone\": \"+7 495 123-45-67\",\n  \"comment\": \"У нас открыта вакансия backend-разработчика, готовы обсудить оффер и зарплату.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "POST /api/contact — невалидный email (422)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/api/contact", "host": ["{{base_url}}"], "path": ["api", "contact"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Иван\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"+7 900 123-45-67\",\n  \"comment\": \"Тестовое сообщение для проверки валидации.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "POST /api/contact — невалидный телефон (422)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/api/contact", "host": ["{{base_url}}"], "path": ["api", "contact"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Иван\",\n  \"email\": \"ivan@example.com\",\n  \"phone\": \"123\",\n  \"comment\": \"Тестовое сообщение для проверки валидации.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "GET /api/health",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/api/health", "host": ["{{base_url}}"], "path": ["api", "health"] }
+      }
+    },
+    {
+      "name": "GET /api/metrics",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/api/metrics", "host": ["{{base_url}}"], "path": ["api", "metrics"] }
+      }
+    }
+  ]
+}
