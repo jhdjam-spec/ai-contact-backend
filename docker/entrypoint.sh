@@ -6,7 +6,7 @@ set -euo pipefail
 echo "[entrypoint] Applying database migrations..."
 # Не роняем контейнер, если БД ещё не готова на первой попытке — короткий ретрай.
 for attempt in 1 2 3 4 5; do
-  if alembic upgrade head; then
+  if python -m alembic upgrade head; then
     echo "[entrypoint] Migrations applied."
     break
   fi

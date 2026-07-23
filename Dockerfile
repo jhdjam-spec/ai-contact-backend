@@ -17,18 +17,20 @@ WORKDIR /build
 COPY pyproject.toml poetry.lock* ./
 
 # Экспортируем только прод-зависимости в requirements.txt и ставим в /install.
-# packaging ставим отдельно как страховку: poetry export иногда теряет эту
-# транзитивную зависимость (slowapi→limits→packaging), без неё падает импорт app.
+# packaging дописываем прямо в requirements и ставим через --target ровно в тот
+# каталог, что прописан в runtime PYTHONPATH, — иначе pip считает пакет «уже
+# удовлетворённым» в builder-образе и не кладёт его в /install (slowapi→limits→
+# packaging, без него падает импорт app с ModuleNotFoundError).
 RUN poetry export --without dev --without-hashes -f requirements.txt -o requirements.txt \
-    && pip install --prefix=/install -r requirements.txt \
-    && pip install --prefix=/install packaging
+    && printf '\npackaging>=21\n' >> requirements.txt \
+    && pip install --no-cache-dir --target=/install/lib/python3.12/site-packages -r requirements.txt
 
 # ---------- Stage 2: runtime ----------
 FROM python:3.12-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/install/bin:$PATH" \
+    PATH="/install/lib/python3.12/site-packages/bin:/install/bin:$PATH" \
     PYTHONPATH="/install/lib/python3.12/site-packages"
 
 # Непривилегированный пользователь.
@@ -49,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health').status==200 else 1)" || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
