@@ -23,6 +23,7 @@ fastapi-mail = "^1.4.2"
 httpx = "^0.27.0"
 anthropic = "^0.39.0"
 greenlet = "^3.1.0"
+packaging = ">=21"  # транзитивная зависимость slowapi→limits; выносим явно, чтобы poetry export её не терял
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

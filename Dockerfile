@@ -17,8 +17,11 @@ WORKDIR /build
 COPY pyproject.toml poetry.lock* ./
 
 # Экспортируем только прод-зависимости в requirements.txt и ставим в /install.
+# packaging ставим отдельно как страховку: poetry export иногда теряет эту
+# транзитивную зависимость (slowapi→limits→packaging), без неё падает импорт app.
 RUN poetry export --without dev --without-hashes -f requirements.txt -o requirements.txt \
-    && pip install --prefix=/install -r requirements.txt
+    && pip install --prefix=/install -r requirements.txt \
+    && pip install --prefix=/install packaging
 
 # ---------- Stage 2: runtime ----------
 FROM python:3.12-slim AS runtime
