@@ -43,7 +43,7 @@ class AppError(Exception):
 
 
 class ValidationAppError(AppError):
-    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     code = "validation_error"
     message = "Некорректные входные данные"
 
@@ -102,7 +102,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         ]
         logger.info("validation_error", details=details)
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content=_envelope(
                 request, "validation_error", "Некорректные входные данные", details
             ),
