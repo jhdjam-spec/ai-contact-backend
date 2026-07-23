@@ -2,9 +2,14 @@
 
 Тонкий слой: принимает валидированное тело, передаёт в сервис, ставит фоновую
 задачу на AI+email и возвращает 202 Accepted. Никакой бизнес-логики здесь нет.
-"""
 
-from __future__ import annotations
+ВАЖНО: здесь НЕ используем `from __future__ import annotations`. Под декоратором
+`@limiter.limit` (slowapi оборачивает функцию через functools.wraps) FastAPI не
+может разрезолвить отложенные строковые аннотации параметров-зависимостей, и все
+они деградируют до обязательных полей тела → каждый валидный запрос падает с 422
+(«payload/background_tasks/service — Field required»). С реальными аннотациями
+(объектами, а не строками) резолвинг работает корректно.
+"""
 
 from fastapi import APIRouter, BackgroundTasks, Request, status
 
